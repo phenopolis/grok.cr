@@ -1,0 +1,14 @@
+---
+name: LibGrok
+ldflags: "-lgrokj2k -lhwy -ljpeg -llcms2 -lstdc++"
+definitions:
+  repository:
+    includes:
+      - /path/to/ext/grok/grok.h
+    prefixes:
+      - grk_
+rename:
+  rules:
+    FunDef:
+      - pattern: grk_
+        replacement: ""

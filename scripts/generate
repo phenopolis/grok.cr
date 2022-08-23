@@ -1,0 +1,71 @@
+#!/usr/bin/env crystal
+
+system("libgen lib.yml")
+
+repository_path = "src/lib_grok/repository.cr"
+repository = File.read(repository_path)
+
+{
+  "Grk"        => "",
+  "Io"         => "IO",
+  "LibC::Bool" => "Bool",
+  "Uint"       => "UInt",
+  "X__"        => "",
+  "X_"         => "",
+}.each do |before, after|
+  repository = repository.gsub(before, after)
+end
+
+[
+  "Int32T",
+  "UInt16T",
+  "UInt16T",
+  "UInt32T",
+  "UInt32T",
+  "UInt64T",
+  "UInt64T",
+  "UInt8T",
+  "UInt8T",
+].each do |alias_name|
+  repository = repository.gsub("\n  alias #{alias_name} = #{alias_name}", "")
+end
+
+[
+  "Asoc",
+  "ChannelAssoc",
+  "ChannelDefinition",
+  "ChannelDescription",
+  "ChannelType",
+  "CodecFormat",
+  "Color",
+  "ColorSpace",
+  "ComponentMappingComp",
+  "Cparameters",
+  "DecompressCoreParams",
+  "DecompressParameters",
+  "HeaderInfo",
+  "Image",
+  "ImageComp",
+  "ImageMeta",
+  "IOBuf",
+  "IOInit",
+  "Object",
+  "PaletteData",
+  "PluginBand",
+  "PluginCodeBlock",
+  "PluginDecompressCallbackInfo",
+  "PluginInitInfo",
+  "PluginLoadInfo",
+  "PluginPass",
+  "PluginPrecinct",
+  "PluginResolution",
+  "PluginTile",
+  "ProgOrder",
+  "Progression",
+  "RawCompCparameters",
+  "RawCparameters",
+].each do |type_name|
+  repository = repository.gsub("\n  type #{type_name} = #{type_name}", "")
+end
+
+File.write(repository_path, repository)

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+rm -rf tmp
+mkdir -p tmp
+
+docker build -t examples -f scripts/examples/Dockerfile .
+docker run \
+  --rm \
+  -it \
+  -v $(pwd):/workspace \
+  -u $(id -u $USER):$(id -g $USER) \
+  examples \
+  cp decompress /workspace/tmp/decompress
