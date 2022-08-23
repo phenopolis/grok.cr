@@ -5,15 +5,7 @@ RUN apk add \
   cmake \
   crystal \
   git \
-  highway-dev \
-  lcms2-dev \
-  libjpeg-turbo-static \
   nasm
-
-RUN rm \
-  /lib/libz.so \
-  /usr/lib/libjpeg.so \
-  /usr/lib/libwebp.so
 
 RUN git clone --depth 1 https://github.com/GrokImageCompression/grok.git
 WORKDIR /grok
@@ -22,14 +14,12 @@ RUN cmake \
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_EXE_LINKER_FLAGS="-static" \
   .
-RUN make \
-  -C build \
-  -j $(nproc) \
-  install
+RUN make -C build -j $(nproc)
 
 WORKDIR /grok.cr
 COPY . .
-RUN crystal build \
+RUN CRYSTAL_LIBRARY_PATH=/grok/build/bin:$CRYSTAL_LIBRARY_PATH \
+  crystal build \
   --no-debug \
   --release \
   --static \
