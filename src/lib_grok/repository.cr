@@ -98,6 +98,8 @@ lib LibGrok
   fun compress_with_plugin = grk_compress_with_plugin(codec : Codec*, tile : PluginTile*) : Bool
   fun decompress = grk_decompress(codec : Codec*, tile : PluginTile*) : Bool
   fun decompress_create = grk_decompress_create(format : CodecFormat, stream : Stream*) : Codec*
+  fun decompress_detect_format_from_buffer = grk_decompress_detect_format_from_buffer(buffer : UInt8T*, len : LibC::SizeT, fmt : SupportedFileFmt*) : Bool
+  fun decompress_detect_format_from_file = grk_decompress_detect_format_from_file(file_name : LibC::Char*, fmt : SupportedFileFmt*) : Bool
   fun decompress_get_composited_image = grk_decompress_get_composited_image(codec : Codec*) : Image*
   fun decompress_get_tile_image = grk_decompress_get_tile_image(codec : Codec*, tile_index : UInt16T) : Image*
   fun decompress_init = grk_decompress_init(codec : Codec*, parameters : DecompressCoreParams*) : Bool
