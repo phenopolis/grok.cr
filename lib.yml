@@ -1,6 +1,6 @@
 ---
 name: LibGrok
-ldflags: "-lgrokj2k -lhwy -ljpeg -llcms2 -lstdc++"
+ldflags: "-lgrokj2k -lhwy -llcms2 -lstdc++"
 definitions:
   repository:
     includes:
