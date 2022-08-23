@@ -6,9 +6,20 @@ repository_path = "src/lib_grok/repository.cr"
 repository = File.read(repository_path)
 
 {
+  "BmpFmt"     => "BMPFmt",
+  "CodecJp2"   => "CodecJP2",
   "Grk"        => "",
   "Io"         => "IO",
+  "Jp2Fmt"     => "JP2Fmt",
+  "JpgFmt"     => "JPGFmt",
   "LibC::Bool" => "Bool",
+  "PamFmt"     => "PAMFmt",
+  "PgxFmt"     => "PGXFmt",
+  "PngFmt"     => "PNGFmt",
+  "PxmFmt"     => "PXMFmt",
+  "RawFmt"     => "RAWFmt",
+  "RawlFmt"    => "RAWLFmt",
+  "TifFmt"     => "TIFFmt",
   "Uint"       => "UInt",
   "X__"        => "",
   "X_"         => "",

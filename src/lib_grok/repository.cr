@@ -48,16 +48,16 @@ lib LibGrok
   enum SupportedFileFmt
     UnkFmt  =  0
     J2KFmt  =  1
-    Jp2Fmt  =  2
-    PxmFmt  =  3
-    PgxFmt  =  4
-    PamFmt  =  5
-    BmpFmt  =  6
-    TifFmt  =  7
-    RawFmt  =  8
-    PngFmt  =  9
-    RawlFmt = 10
-    JpgFmt  = 11
+    JP2Fmt  =  2
+    PXMFmt  =  3
+    PGXFmt  =  4
+    PAMFmt  =  5
+    BMPFmt  =  6
+    TIFFmt  =  7
+    RAWFmt  =  8
+    PNGFmt  =  9
+    RAWLFmt = 10
+    JPGFmt  = 11
   end
   enum TileCacheStrategy
     TileCacheNone  = 0
@@ -66,7 +66,7 @@ lib LibGrok
   enum CodecFormat
     CodecUnknown = -1
     CodecJ2K     =  0
-    CodecJp2     =  2
+    CodecJP2     =  2
   end
   enum ColorSpace
     ClrspcUnknown    = 0
