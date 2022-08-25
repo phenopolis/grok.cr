@@ -1,7 +1,6 @@
 #!/bin/sh
 
-rm -rf tmp
-mkdir -p tmp
+mkdir -p bin
 
 docker build -t examples -f scripts/examples/Dockerfile .
 docker run \
@@ -10,4 +9,4 @@ docker run \
   -v $(pwd):/workspace \
   -u $(id -u $USER):$(id -g $USER) \
   examples \
-  cp decompress /workspace/tmp/decompress
+  cp decompress /workspace/bin/decompress
