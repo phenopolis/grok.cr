@@ -7,7 +7,7 @@ decompress_core_params = LibGrok::DecompressCoreParams.new
 LibGrok.decompress_set_default_params(pointerof(decompress_core_params))
 LibGrok.initialize(nil, 0)
 
-stream = LibGrok.stream_create_mem_stream(image_data, image_data.size * 1.04857, false, true)
+stream = LibGrok.stream_create_mem_stream(image_data, image_data.bytesize, false, true)
 codec = LibGrok.decompress_create(LibGrok::CodecFormat::CodecJ2K, stream)
 
 LibGrok.decompress_init(codec, pointerof(decompress_core_params))
