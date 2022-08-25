@@ -1,4 +1,4 @@
-@[Link(ldflags: "-lgrokj2k -lhwy -llcms2 -lstdc++")]
+@[Link(ldflags: "-lgrokj2k -lhwy -ljpeg -llcms2 -lstdc++")]
 lib LibGrok
   alias Codec = Object
   alias IOCallback = (UInt32T, IOBuf, Void* -> Bool)
