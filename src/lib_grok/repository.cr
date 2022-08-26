@@ -46,27 +46,27 @@ lib LibGrok
     RateControlPcrdOpt = 1
   end
   enum SupportedFileFmt
-    UnkFmt  =  0
-    J2KFmt  =  1
-    JP2Fmt  =  2
-    PXMFmt  =  3
-    PGXFmt  =  4
-    PAMFmt  =  5
-    BMPFmt  =  6
-    TIFFmt  =  7
-    RAWFmt  =  8
-    PNGFmt  =  9
-    RAWLFmt = 10
-    JPGFmt  = 11
+    FmtUnk  =  0
+    FmtJ2K  =  1
+    FmtJP2  =  2
+    FmtPXM  =  3
+    FmtPGX  =  4
+    FmtPAM  =  5
+    FmtBMP  =  6
+    FmtTIF  =  7
+    FmtRAW  =  8
+    FmtPNG  =  9
+    FmtRAWl = 10
+    FmtJPG  = 11
   end
   enum TileCacheStrategy
     TileCacheNone  = 0
     TileCacheImage = 1
   end
   enum CodecFormat
-    CodecUnknown = -1
-    CodecJ2K     =  0
-    CodecJP2     =  2
+    CodecUnk = -1
+    CodecJ2K =  0
+    CodecJP2 =  2
   end
   enum ColorSpace
     ClrspcUnknown    = 0
@@ -97,9 +97,11 @@ lib LibGrok
   fun compress_tile = grk_compress_tile(codec : Codec*, tile_index : UInt16T, data : UInt8T*, data_size : UInt64T) : Bool
   fun compress_with_plugin = grk_compress_with_plugin(codec : Codec*, tile : PluginTile*) : Bool
   fun decompress = grk_decompress(codec : Codec*, tile : PluginTile*) : Bool
-  fun decompress_create = grk_decompress_create(format : CodecFormat, stream : Stream*) : Codec*
-  fun decompress_detect_format_from_buffer = grk_decompress_detect_format_from_buffer(buffer : UInt8T*, len : LibC::SizeT, fmt : SupportedFileFmt*) : Bool
-  fun decompress_detect_format_from_file = grk_decompress_detect_format_from_file(file_name : LibC::Char*, fmt : SupportedFileFmt*) : Bool
+  fun decompress_buffer_detect_format = grk_decompress_buffer_detect_format(buffer : UInt8T*, len : LibC::SizeT, fmt : CodecFormat*) : Bool
+  fun decompress_create = grk_decompress_create(stream : Stream*) : Codec*
+  fun decompress_create_from_buffer = grk_decompress_create_from_buffer(buf : UInt8T*, len : LibC::SizeT) : Codec*
+  fun decompress_create_from_file = grk_decompress_create_from_file(file_name : LibC::Char*) : Codec*
+  fun decompress_detect_format = grk_decompress_detect_format(file_name : LibC::Char*, fmt : CodecFormat*) : Bool
   fun decompress_get_composited_image = grk_decompress_get_composited_image(codec : Codec*) : Image*
   fun decompress_get_tile_image = grk_decompress_get_tile_image(codec : Codec*, tile_index : UInt16T) : Image*
   fun decompress_init = grk_decompress_init(codec : Codec*, parameters : DecompressCoreParams*) : Bool
@@ -133,7 +135,6 @@ lib LibGrok
   fun stream_create_mapped_file_stream = grk_stream_create_mapped_file_stream(fname : LibC::Char*, read_stream : Bool) : Stream*
   fun stream_create_mem_stream = grk_stream_create_mem_stream(buf : UInt8T*, buffer_len : LibC::SizeT, owns_buffer : Bool, is_read_stream : Bool) : Stream*
   fun stream_get_write_mem_stream_length = grk_stream_get_write_mem_stream_length(stream : Stream*) : LibC::SizeT
-  fun stream_new = grk_stream_new(buffer_size : LibC::SizeT, is_input : Bool) : Stream*
   fun stream_set_read_function = grk_stream_set_read_function(stream : Stream*, func : StreamReadFn)
   fun stream_set_seek_function = grk_stream_set_seek_function(stream : Stream*, func : StreamSeekFn)
   fun stream_set_user_data = grk_stream_set_user_data(stream : Stream*, data : Void*, func : StreamFreeUserDataFn)
@@ -270,7 +271,7 @@ lib LibGrok
     core : DecompressCoreParams
     infile : LibC::Char[4096]
     outfile : LibC::Char[4096]
-    decod_format : SupportedFileFmt
+    decod_format : CodecFormat
     cod_format : SupportedFileFmt
     dw_x0 : LibC::Float
     dw_x1 : LibC::Float
@@ -442,7 +443,7 @@ lib LibGrok
     init_decompressors_func : GrokInitDecompressors
     input_file_name : LibC::Char*
     output_file_name : LibC::Char*
-    decod_format : SupportedFileFmt
+    decod_format : CodecFormat
     cod_format : SupportedFileFmt
     stream : Stream*
     codec : Codec*

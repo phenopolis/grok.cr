@@ -7,8 +7,7 @@ decompress_core_params = LibGrok::DecompressCoreParams.new
 LibGrok.decompress_set_default_params(pointerof(decompress_core_params))
 LibGrok.initialize(nil, 0)
 
-stream = LibGrok.stream_create_mem_stream(image_data, image_data.bytesize, false, true)
-codec = LibGrok.decompress_create(LibGrok::CodecFormat::CodecJ2K, stream)
+codec = LibGrok.decompress_create_from_buffer(image_data, image_data.bytesize)
 
 LibGrok.decompress_init(codec, pointerof(decompress_core_params))
 LibGrok.decompress_read_header(codec, nil)
@@ -22,6 +21,5 @@ image.numcomps.times do |numcomp|
   puts data.size
 end
 
-LibGrok.object_unref(stream)
 LibGrok.object_unref(codec)
 LibGrok.deinitialize
