@@ -98,13 +98,10 @@ lib LibGrok
   fun compress_with_plugin = grk_compress_with_plugin(codec : Codec*, tile : PluginTile*) : Bool
   fun decompress = grk_decompress(codec : Codec*, tile : PluginTile*) : Bool
   fun decompress_buffer_detect_format = grk_decompress_buffer_detect_format(buffer : UInt8T*, len : LibC::SizeT, fmt : CodecFormat*) : Bool
-  fun decompress_create = grk_decompress_create(stream : Stream*) : Codec*
-  fun decompress_create_from_buffer = grk_decompress_create_from_buffer(buf : UInt8T*, len : LibC::SizeT) : Codec*
-  fun decompress_create_from_file = grk_decompress_create_from_file(file_name : LibC::Char*) : Codec*
   fun decompress_detect_format = grk_decompress_detect_format(file_name : LibC::Char*, fmt : CodecFormat*) : Bool
   fun decompress_get_composited_image = grk_decompress_get_composited_image(codec : Codec*) : Image*
   fun decompress_get_tile_image = grk_decompress_get_tile_image(codec : Codec*, tile_index : UInt16T) : Image*
-  fun decompress_init = grk_decompress_init(codec : Codec*, parameters : DecompressCoreParams*) : Bool
+  fun decompress_init = grk_decompress_init(init_params : DecompressInitParams*, core_params : DecompressCoreParams*) : Codec*
   fun decompress_read_header = grk_decompress_read_header(codec : Codec*, header_info : HeaderInfo*) : Bool
   fun decompress_set_default_params = grk_decompress_set_default_params(parameters : DecompressCoreParams*)
   fun decompress_set_window = grk_decompress_set_window(codec : Codec*, start_x : LibC::Float, start_y : LibC::Float, end_x : LibC::Float, end_y : LibC::Float) : Bool
@@ -265,6 +262,12 @@ lib LibGrok
     io_buffer_callback : IOPixelsCallback
     io_user_data : Void*
     io_register_client_callback : IORegisterReclaimCallback
+  end
+
+  struct DecompressInitParams
+    src_file : LibC::Char*
+    src_buf : UInt8T*
+    src_buf_len : LibC::SizeT
   end
 
   struct DecompressParams

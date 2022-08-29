@@ -54,6 +54,7 @@ end
   "ComponentMappingComp",
   "Cparameters",
   "DecompressCoreParams",
+  "DecompressInitParams",
   "DecompressParameters",
   "HeaderInfo",
   "Image",
