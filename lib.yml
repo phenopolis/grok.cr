@@ -2,7 +2,7 @@
 name: LibGrok
 ldflags: "-lgrokj2k -lhwy -ljpeg -llcms2 -lstdc++"
 definitions:
-  repository:
+  lib_grok:
     includes:
       - /path/to/ext/grok/grok.h
     prefixes:

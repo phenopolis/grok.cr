@@ -2,8 +2,8 @@
 
 system("libgen lib.yml")
 
-repository_path = "src/lib_grok/repository.cr"
-repository = File.read(repository_path)
+path = "src/lib_grok/lib_grok.cr"
+content = File.read(path)
 
 {
   "CodecJp2"   => "CodecJP2",
@@ -25,7 +25,7 @@ repository = File.read(repository_path)
   "X__"        => "",
   "X_"         => "",
 }.each do |before, after|
-  repository = repository.gsub(before, after)
+  content = content.gsub(before, after)
 end
 
 [
@@ -39,7 +39,7 @@ end
   "UInt8T",
   "UInt8T",
 ].each do |alias_name|
-  repository = repository.gsub("\n  alias #{alias_name} = #{alias_name}", "")
+  content = content.gsub("\n  alias #{alias_name} = #{alias_name}", "")
 end
 
 [
@@ -82,7 +82,7 @@ end
   "SupportedFileFmt",
   "TileCacheStrategy",
 ].each do |type_name|
-  repository = repository.gsub("\n  type #{type_name} = #{type_name}", "")
+  content = content.gsub("\n  type #{type_name} = #{type_name}", "")
 end
 
-File.write(repository_path, repository)
+File.write(path, content)
