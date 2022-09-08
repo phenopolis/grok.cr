@@ -54,8 +54,6 @@ end
   "ComponentMappingComp",
   "Cparameters",
   "DecompressCoreParams",
-  "DecompressInitParams",
-  "DecompressParameters",
   "HeaderInfo",
   "Image",
   "ImageComp",
@@ -73,10 +71,16 @@ end
   "PluginPrecinct",
   "PluginResolution",
   "PluginTile",
+  "Precision",
+  "PrecisionMode",
   "ProgOrder",
   "Progression",
+  "RateControlAlgorithm",
   "RawCompCparameters",
   "RawCparameters",
+  "StreamParams",
+  "SupportedFileFmt",
+  "TileCacheStrategy",
 ].each do |type_name|
   repository = repository.gsub("\n  type #{type_name} = #{type_name}", "")
 end

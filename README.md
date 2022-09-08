@@ -1,6 +1,6 @@
 # Grok.cr
 
-Crystal bindings for [Grok](https://github.com/GrokImageCompression/grok)
+Crystal bindings for [Grok](https://github.com/GrokImageCompression/grok) 10.0.0
 
 ## Installation
 
