@@ -222,6 +222,7 @@ lib LibGrok
     capture_resolution : LibC::Double[2]
     write_display_resolution : Bool
     display_resolution : LibC::Double[2]
+    apply_icc_ : Bool
     rate_control_algorithm : RateControlAlgorithm
     num_threads : UInt32T
     device_id : Int32T
@@ -368,9 +369,9 @@ lib LibGrok
 
   struct IOBuf
     data_ : UInt8T*
-    offset_ : UInt64T
-    len_ : UInt64T
-    alloc_len_ : UInt64T
+    offset_ : LibC::SizeT
+    len_ : LibC::SizeT
+    alloc_len_ : LibC::SizeT
     pooled_ : Bool
     index_ : UInt32T
   end
