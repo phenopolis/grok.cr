@@ -18,7 +18,7 @@ RUN cmake \
 RUN make -C build -j$(nproc) install
 
 WORKDIR /grok
-RUN git clone --branch v10.0.0 --depth 1 https://github.com/GrokImageCompression/grok.git .
+RUN git clone --branch v10.0.4 --depth 1 https://github.com/GrokImageCompression/grok.git .
 RUN cmake \
   -B build \
   -DBUILD_SHARED_LIBS=OFF \
