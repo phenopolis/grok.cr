@@ -39,14 +39,14 @@ lib LibGrok
   end
   enum ColorSpace
     ClrspcUnknown    = 0
-    ClrspcSrgb       = 2
+    ClrspcSRGB       = 2
     ClrspcGray       = 3
-    ClrspcSycc       = 4
-    ClrspcEycc       = 5
-    ClrspcCmyk       = 6
-    ClrspcDefaultCie = 7
-    ClrspcCustomCie  = 8
-    ClrspcIcc        = 9
+    ClrspcSYCC       = 4
+    ClrspcEYCC       = 5
+    ClrspcCMYK       = 6
+    ClrspcDefaultCIE = 7
+    ClrspcCustomCIE  = 8
+    ClrspcICC        = 9
   end
   enum PrecisionMode
     PrecModeClip  = 0
@@ -76,7 +76,7 @@ lib LibGrok
     FmtTIF  =  7
     FmtRAW  =  8
     FmtPNG  =  9
-    FmtRAWl = 10
+    FmtRAWL = 10
     FmtJPG  = 11
   end
   enum TileCacheStrategy
