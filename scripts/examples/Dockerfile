@@ -1,21 +1,15 @@
-FROM alpine:latest
+FROM alpine:edge
 
 RUN apk add \
   build-base \
   cmake \
   crystal \
   git \
-  nasm
+  libjpeg-turbo-dev \
+  libjpeg-turbo-static \
+  yasm
 
-WORKDIR /libjpeg-turbo
-RUN git clone --branch 2.0.x --depth 1 https://github.com/libjpeg-turbo/libjpeg-turbo .
-RUN cmake \
-  -B build \
-  -DCMAKE_INSTALL_PREFIX=/usr \
-  -DENABLE_SHARED=OFF \
-  -DENABLE_STATIC=ON \
-  .
-RUN make -C build -j$(nproc) install
+RUN rm /usr/lib/libjpeg.so
 
 WORKDIR /grok
 RUN git clone --branch v10.0.4 --depth 1 https://github.com/GrokImageCompression/grok.git .
