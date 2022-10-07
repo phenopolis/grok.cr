@@ -1,15 +1,13 @@
 require "../src/grok"
 
+LibGrok.initialize(nil, 0)
+
 image_path = ARGV[0]
 image_data = File.read(image_path)
 decompress_core_params = LibGrok::DecompressCoreParams.new
 stream_params = LibGrok::StreamParams.new
 stream_params.buf = image_data
 stream_params.len = image_data.bytesize
-
-LibGrok.decompress_set_default_params(pointerof(decompress_core_params))
-LibGrok.initialize(nil, 0)
-
 codec = LibGrok.decompress_init(pointerof(stream_params), pointerof(decompress_core_params))
 
 LibGrok.decompress_read_header(codec, nil)
