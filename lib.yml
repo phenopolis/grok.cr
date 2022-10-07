@@ -1,6 +1,6 @@
 ---
 name: LibGrok
-ldflags: "-lgrokj2k -lhwy -ljpeg -llcms2 -lstdc++"
+ldflags: "-lgrokj2k -ljpeg -lstdc++"
 definitions:
   lib_grok:
     includes:
