@@ -16,9 +16,15 @@ LibGrok.decompress(codec, nil)
 image = LibGrok.decompress_get_composited_image(codec).value
 
 image.numcomps.times do |numcomp|
+  channel = [] of Int32
   comp = image.comps[numcomp]
-  data = comp.data.to_slice(comp.w * comp.h)
-  puts data.size
+
+  comp.h.times do
+    channel += comp.data.to_slice(comp.w).to_a
+    comp.data += comp.stride
+  end
+
+  puts channel.size
 end
 
 LibGrok.object_unref(codec)
