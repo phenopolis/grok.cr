@@ -14,17 +14,21 @@ LibGrok.decompress_read_header(codec, nil)
 LibGrok.decompress(codec, nil)
 
 image = LibGrok.decompress_get_composited_image(codec).value
+width = image.x1
+height = image.y1
 
 image.numcomps.times do |numcomp|
-  channel = [] of Int32
+  channel = Pointer.malloc(width * height, 0)
   comp = image.comps[numcomp]
 
-  comp.h.times do
-    channel += comp.data.to_slice(comp.w).to_a
+  height.times do
+    channel.copy_from(comp.data, comp.stride)
+    channel += width
     comp.data += comp.stride
   end
+  channel -= height * width
 
-  puts channel.size
+  puts channel.to_slice(width * height).size
 end
 
 LibGrok.object_unref(codec)
