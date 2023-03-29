@@ -5,7 +5,7 @@ lib LibGrok
   alias IOPixelsCallback = (UInt32T, IOBuf, Void* -> Bool)
   alias IORegisterReclaimCallback = (IOInit, IOCallback, Void*, Void* -> Void)
   alias MsgCallback = (LibC::Char*, Void* -> Void)
-  alias PluginCompressUserCallback = (PluginCompressUserCallbackInfo* -> Bool)
+  alias PluginCompressUserCallback = (PluginCompressUserCallbackInfo* -> UInt64T)
   alias PluginDecompressCallback = (PluginDecompressCallbackInfo* -> Int32T)
   alias GrokInitDecompressors = (HeaderInfo*, Image* -> LibC::Int)
   alias IOCodecvt = Void
@@ -83,7 +83,7 @@ lib LibGrok
     TileCacheNone  = 0
     TileCacheImage = 1
   end
-  fun compress = grk_compress(codec : Codec*, tile : PluginTile*) : Bool
+  fun compress = grk_compress(codec : Codec*, tile : PluginTile*) : UInt64T
   fun compress_init = grk_compress_init(stream_params : StreamParams*, parameters : Cparameters*, p_image : Image*) : Codec*
   fun compress_set_default_params = grk_compress_set_default_params(parameters : Cparameters*)
   fun decompress = grk_decompress(codec : Codec*, tile : PluginTile*) : Bool
@@ -93,14 +93,14 @@ lib LibGrok
   fun decompress_get_tile_image = grk_decompress_get_tile_image(codec : Codec*, tile_index : UInt16T) : Image*
   fun decompress_init = grk_decompress_init(stream_params : StreamParams*, core_params : DecompressCoreParams*) : Codec*
   fun decompress_read_header = grk_decompress_read_header(codec : Codec*, header_info : HeaderInfo*) : Bool
-  fun decompress_set_default_params = grk_decompress_set_default_params(parameters : DecompressCoreParams*)
+  fun decompress_set_default_params = grk_decompress_set_default_params(parameters : DecompressParameters*)
   fun decompress_set_window = grk_decompress_set_window(codec : Codec*, start_x : LibC::Float, start_y : LibC::Float, end_x : LibC::Float, end_y : LibC::Float) : Bool
   fun decompress_tile = grk_decompress_tile(codec : Codec*, tile_index : UInt16T) : Bool
   fun deinitialize = grk_deinitialize
   fun dump_codec = grk_dump_codec(codec : Codec*, info_flag : UInt32T, output_stream : File*)
   fun image_meta_new = grk_image_meta_new : ImageMeta*
-  fun image_new = grk_image_new(numcmpts : UInt16T, cmptparms : ImageComp*, clrspc : ColorSpace) : Image*
-  fun initialize = grk_initialize(plugin_path : LibC::Char*, numthreads : UInt32T) : Bool
+  fun image_new = grk_image_new(numcmpts : UInt16T, cmptparms : ImageComp*, clrspc : ColorSpace, alloc_data : Bool) : Image*
+  fun initialize = grk_initialize(plugin_path : LibC::Char*, numthreads : UInt32T)
   fun object_ref = grk_object_ref(obj : Object*) : Object*
   fun object_unref = grk_object_unref(obj : Object*)
   fun plugin_batch_compress = grk_plugin_batch_compress(input_dir : LibC::Char*, output_dir : LibC::Char*, compress_parameters : Cparameters*, callback : PluginCompressUserCallback) : Int32T
@@ -125,6 +125,7 @@ lib LibGrok
     output_file_name : LibC::Char*
     compressor_parameters : Cparameters*
     image : Image*
+    out_buffer : StreamParams*
     tile : PluginTile*
     stream_params : StreamParams
     error_code : LibC::UInt
@@ -236,7 +237,7 @@ lib LibGrok
 
   struct DecompressCoreParams
     reduce : UInt8T
-    max_layers : UInt16T
+    layers_to_decompress_ : UInt16T
     tile_cache_strategy : TileCacheStrategy
     random_access_flags_ : UInt32T
     io_buffer_callback : IOPixelsCallback
@@ -270,6 +271,7 @@ lib LibGrok
     kernel_build_options : UInt32T
     repeats : UInt32T
     num_threads : UInt32T
+    user_data : Void*
   end
 
   struct HeaderInfo
@@ -296,7 +298,7 @@ lib LibGrok
     t_height : UInt32T
     t_grid_width : UInt32T
     t_grid_height : UInt32T
-    numlayers : UInt16T
+    max_layers_ : UInt16T
     xml_data : UInt8T*
     xml_data_len : LibC::SizeT
     num_comments : LibC::SizeT
@@ -527,6 +529,7 @@ lib LibGrok
     file : LibC::Char*
     buf : UInt8T*
     len : LibC::SizeT
+    buf_compressed_len : LibC::SizeT
   end
 
   struct IOFile
