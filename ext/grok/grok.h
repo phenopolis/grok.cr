@@ -108,6 +108,24 @@ typedef enum _GRK_ENUM_COLOUR_SPACE
 #define GRK_NUM_COMMENTS_SUPPORTED 256
 #define GRK_NUM_ASOC_BOXES_SUPPORTED 256
 #define GRK_MAX_COMMENT_LENGTH (UINT16_MAX - 2)
+#define GRK_MAX_SUPPORTED_IMAGE_PRECISION 16 /* Maximum supported precision in library */
+
+/* BIBO analysis - extra bits needed to avoid overflow:
+
+ Lossless:
+ without colour transform: 4 extra bits
+ with colour transform:    5 extra bits
+
+ Lossy:
+
+ Need 1 extra bit
+
+ So,  worst-case scenario is lossless with colour transform : need to add 5 more bits to prec to
+ avoid overflow
+ */
+#define BIBO_EXTRA_BITS 7
+
+#define GRK_MAX_PASSES (3 * (GRK_MAX_SUPPORTED_IMAGE_PRECISION + BIBO_EXTRA_BITS) - 2)
 
 /**
  * Logging callback
@@ -220,6 +238,16 @@ typedef enum _GRK_SUPPORTED_FILE_FMT
 	GRK_FMT_JPG
 } GRK_SUPPORTED_FILE_FMT;
 
+/**
+ * Supported JPEG 2000 formats
+ */
+typedef enum _GRK_CODEC_FORMAT
+{
+	GRK_CODEC_UNK, /**< unknown format */
+	GRK_CODEC_J2K, /**< JPEG 2000 code stream format */
+	GRK_CODEC_JP2 /**< JP2 file format */
+} GRK_CODEC_FORMAT;
+
 #define GRK_PATH_LEN 4096 /* Maximum allowed filename size */
 #define GRK_MAX_LAYERS 100 /* Maximum number of quality layers */
 
@@ -274,7 +302,6 @@ typedef struct _grk_palette_data
 /* channel type */
 typedef enum _GRK_CHANNEL_TYPE
 {
-
 	GRK_CHANNEL_TYPE_COLOUR = 0,
 	GRK_CHANNEL_TYPE_OPACITY = 1,
 	GRK_CHANNEL_TYPE_PREMULTIPLIED_OPACITY = 2,
@@ -456,20 +483,67 @@ typedef void (*grk_io_register_reclaim_callback)(grk_io_init io_init,
 typedef bool (*grk_io_pixels_callback)(uint32_t threadId, grk_io_buf buffer, void* user_data);
 
 /**
- * JPEG 2000 stream parameters - either file or buffer
+ * read stream callback
+ *
+ * @buffer buffer to write stream to
+ * @numBytes number of bytes to write to buffer
+ * @user_data user data
+ *
+ */
+typedef size_t (*grk_stream_read_fn)(uint8_t* buffer, size_t numBytes, void* user_data);
+
+/**
+ * write stream callback
+ *
+ * @buffer buffer to read stream from
+ * @numBytes number of bytes to read from buffer
+ * @user_data user data
+ *
+ */
+typedef size_t (*grk_stream_write_fn)(const uint8_t* buffer, size_t numBytes, void* user_data);
+
+/**
+ * seek (absolute) callback
+ *
+ * @offset absolute stream offset
+ * @user_data user data
+ *
+ */
+typedef bool (*grk_stream_seek_fn)(uint64_t offset, void* user_data);
+
+/**
+ * free user data callback
+ *
+ * @user_data user data
+ *
+ */
+typedef void (*grk_stream_free_user_data_fn)(void* user_data);
+
+/**
+ * JPEG 2000 stream parameters. Client must populate one of the following options :
+ * 1. File
+ * 2. Buffer
+ * 3. Callback
  */
 typedef struct _grk_stream_params
 {
-	/* File */
-	// file name
+	/* 1. File */
 	const char* file;
 
-	/* Buffer */
-	// buffer and buffer length
+	/* 2. Buffer */
 	uint8_t* buf;
-	size_t len;
-	// length of compressed stream (set by compressor, not client)
+	size_t buf_len;
+	/* length of compressed stream (set by compressor, not client) */
 	size_t buf_compressed_len;
+
+	/* 3. Callback */
+	grk_stream_read_fn read_fn;
+	grk_stream_write_fn write_fn;
+	grk_stream_seek_fn seek_fn;
+	grk_stream_free_user_data_fn free_user_data_fn; // optional
+	void* user_data;
+	size_t stream_len; // must be set for read stream
+	size_t double_buffer_len; // optional - default value is 1024 * 1024
 } grk_stream_params;
 
 typedef enum _GRK_TILE_CACHE_STRATEGY
@@ -508,16 +582,6 @@ typedef struct _grk_decompress_core_params
 } grk_decompress_core_params;
 
 #define GRK_DECOMPRESS_COMPRESSION_LEVEL_DEFAULT (UINT_MAX)
-
-/**
- * Supported JPEG 2000 formats
- */
-typedef enum _GRK_CODEC_FORMAT
-{
-	GRK_CODEC_UNK = -1, /**< place-holder */
-	GRK_CODEC_J2K = 0, /**< JPEG 2000 code stream : read/write */
-	GRK_CODEC_JP2 = 2 /**< JP2 file format : read/write */
-} GRK_CODEC_FORMAT;
 
 /**
  * Decompression parameters
@@ -686,7 +750,7 @@ typedef struct _grk_plugin_code_block
 	uint32_t compressedDataLength;
 	uint8_t numBitPlanes;
 	size_t numPasses;
-	grk_plugin_pass passes[67];
+	grk_plugin_pass passes[GRK_MAX_PASSES];
 	unsigned int sortedIndex;
 } grk_plugin_code_block;
 
@@ -762,7 +826,7 @@ GRK_API const char* GRK_CALLCONV grk_version(void);
  * @param pluginPath 	path to plugin
  * @param numthreads 	number of threads to use for compress/decompress
  */
-GRK_API void GRK_CALLCONV grk_initialize(const char* pluginPath, uint32_t numthreads);
+GRK_API void GRK_CALLCONV grk_initialize(const char* pluginPath, uint32_t numthreads, bool verbose);
 
 /**
  * De-initialize library
@@ -813,18 +877,12 @@ GRK_API grk_image_meta* GRK_CALLCONV grk_image_meta_new(void);
 GRK_API bool GRK_CALLCONV grk_decompress_detect_format(const char* fileName, GRK_CODEC_FORMAT* fmt);
 
 /**
- * Detect jpeg 2000 format from buffer
- * Format is either GRK_FMT_J2K or GRK_FMT_JP2
+ * Initialize stream parameters with default values
  *
- * @param buffer buffer
- * @param len buffer length
- * @param fmt pointer to detected format
- *
- * @return true if format was detected, otherwise false
- *
+ * @param parameters stream parameters
  */
-GRK_API bool GRK_CALLCONV grk_decompress_buffer_detect_format(uint8_t* buffer, size_t len,
-															  GRK_CODEC_FORMAT* fmt);
+GRK_API void GRK_CALLCONV grk_set_default_stream_params(grk_stream_params* params);
+
 /**
  * Initialize decompress parameters with default values
  *
@@ -991,11 +1049,6 @@ typedef struct _grk_cparameters
 	/** output file format*/
 	GRK_SUPPORTED_FILE_FMT cod_format;
 	grk_raw_cparameters raw_cp;
-	/**
-	 * Maximum size (in bytes) for each component.
-	 * If == 0, component size limitation is not considered
-	 * */
-	uint32_t max_comp_size;
 	/** Tile part generation*/
 	bool enableTilePartGeneration;
 	/** new tile part progression divider */
@@ -1012,6 +1065,11 @@ typedef struct _grk_cparameters
 	 * and a warning is issued.
 	 * */
 	uint64_t max_cs_size;
+	/**
+	 * Maximum size (in bytes) for each component.
+	 * If == 0, component size limitation is not considered
+	 * */
+	uint64_t max_comp_size;
 	/** RSIZ value
 	 To be used to combine GRK_PROFILE_*, GRK_EXTENSION_* and (sub)levels values. */
 	uint16_t rsiz;
@@ -1038,6 +1096,7 @@ typedef struct _grk_cparameters
 	bool writePLT;
 	bool writeTLM;
 	bool verbose;
+	bool sharedMemoryInterface;
 } grk_cparameters;
 
 /**
@@ -1103,8 +1162,6 @@ GRK_API void GRK_CALLCONV grk_dump_codec(grk_codec* codec, uint32_t info_flag, F
  */
 GRK_API bool GRK_CALLCONV grk_set_MCT(grk_cparameters* parameters, float* encodingMatrix,
 									  int32_t* dc_shift, uint32_t nbComp);
-
-#define GRK_MAX_SUPPORTED_IMAGE_PRECISION 16 /* Maximum supported precision in library */
 
 #define GRK_IMG_INFO 1 /* Basic image information provided to the user */
 #define GRK_J2K_MH_INFO 2 /* Codestream information based only on the main header */
@@ -1309,10 +1366,16 @@ GRK_API bool GRK_CALLCONV grk_set_MCT(grk_cparameters* parameters, float* encodi
 /**
  * JPEG 2000 cinema profile code stream and component size limits
  * */
-#define GRK_CINEMA_24_CS 1302083U /** Maximum code stream length @ 24fps */
-#define GRK_CINEMA_48_CS 651041U /** Maximum code stream length @ 48fps */
-#define GRK_CINEMA_24_COMP 1041666U /** Maximum size per color component @ 24fps */
-#define GRK_CINEMA_48_COMP 520833U /** Maximum size per color component @ 48fps */
+
+#define GRK_CINEMA_DCI_MAX_BANDWIDTH 250000000
+
+#define GRK_CINEMA_24_CS 1302083 /** Maximum code stream length @ 24fps */
+#define GRK_CINEMA_24_COMP 1041666 /** Maximum size per color component @ 24fps */
+
+#define GRK_CINEMA_48_CS 651041 /** Maximum code stream length @ 48fps */
+#define GRK_CINEMA_48_COMP 520833 /** Maximum size per color component @ 48fps */
+
+#define GRK_CINEMA_4K_DEFAULT_NUM_RESOLUTIONS 7
 
 /*
  *
@@ -1348,6 +1411,7 @@ GRK_API bool GRK_CALLCONV grk_set_MCT(grk_cparameters* parameters, float* encodi
 typedef struct _grk_plugin_load_info
 {
 	const char* pluginPath;
+	bool verbose;
 } grk_plugin_load_info;
 
 /**
@@ -1397,6 +1461,8 @@ typedef struct _grk_plugin_init_info
 {
 	int32_t deviceId;
 	bool verbose;
+	const char* license;
+	const char* server;
 } grk_plugin_init_info;
 
 /**
@@ -1411,7 +1477,6 @@ typedef struct grk_plugin_compress_user_callback_info
 	const char* output_file_name;
 	grk_cparameters* compressor_parameters;
 	grk_image* image;
-	grk_stream_params* out_buffer;
 	grk_plugin_tile* tile;
 	grk_stream_params stream_params;
 	unsigned int error_code;
@@ -1419,6 +1484,14 @@ typedef struct grk_plugin_compress_user_callback_info
 } grk_plugin_compress_user_callback_info;
 
 typedef uint64_t (*GRK_PLUGIN_COMPRESS_USER_CALLBACK)(grk_plugin_compress_user_callback_info* info);
+
+typedef struct grk_plugin_compress_batch_info
+{
+	const char* input_dir;
+	const char* output_dir;
+	grk_cparameters* compress_parameters;
+	GRK_PLUGIN_COMPRESS_USER_CALLBACK callback;
+} grk_plugin_compress_batch_info;
 
 /**
  * Compress with plugin
@@ -1440,15 +1513,12 @@ GRK_API int32_t GRK_CALLCONV grk_plugin_compress(grk_cparameters* compress_param
  * @return 0 if successful
  *
  */
-GRK_API int32_t GRK_CALLCONV grk_plugin_batch_compress(const char* input_dir,
-													   const char* output_dir,
-													   grk_cparameters* compress_parameters,
-													   GRK_PLUGIN_COMPRESS_USER_CALLBACK callback);
+GRK_API int32_t GRK_CALLCONV grk_plugin_batch_compress(grk_plugin_compress_batch_info info);
 
 /**
- * Check if batch job is complete
+ * Wait for batch job to complete
  */
-GRK_API bool GRK_CALLCONV grk_plugin_is_batch_complete(void);
+GRK_API void GRK_CALLCONV grk_plugin_wait_for_batch_complete(void);
 
 /**
  * Stop batch compress
