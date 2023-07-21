@@ -4,7 +4,7 @@ ldflags: "-lgrokj2k -ljpeg -lstdc++"
 definitions:
   lib_grok:
     includes:
-      - /home/sanks/Projects/phenopolis-grok.cr/ext/grok/grok.h
+      - /path/to/ext/grok/grok.h
     prefixes:
       - grk_
 rename:
