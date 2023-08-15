@@ -1,6 +1,0 @@
-#!/bin/sh
-
-mkdir -p bin
-
-docker build -t examples .
-docker run -v $(pwd):/workspace -u $(id -u) examples cp decompress /workspace/bin/decompress

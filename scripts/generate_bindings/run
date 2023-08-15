@@ -1,6 +1,22 @@
 #!/usr/bin/env crystal
 
-system("libgen lib.yml")
+system(
+  String.build do |string|
+    string << "docker build "
+    string << "-f scripts/generate_bindings/Dockerfile "
+    string << "-t generate_bindings "
+    string << "."
+  end
+)
+system(
+  String.build do |string|
+    string << "docker run "
+    string << "-u $(id -u) "
+    string << "-v $(pwd):/workspace "
+    string << "generate_bindings "
+    string << "cp src/lib_grok/lib_grok.cr /workspace/src/lib_grok/lib_grok.cr"
+  end
+)
 
 path = "src/lib_grok/lib_grok.cr"
 content = File.read(path)
