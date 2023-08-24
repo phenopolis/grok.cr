@@ -44,7 +44,6 @@ content = File.read(path)
   "Io"               => "IO",
   "LibC::Bool"       => "Bool",
   "Uint"             => "UInt",
-  "X__"              => "",
   "X_"               => "",
 }.each do |before, after|
   content = content.gsub(before, after)
