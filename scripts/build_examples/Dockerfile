@@ -17,6 +17,7 @@ RUN cmake \
   -B build \
   -DBUILD_SHARED_LIBS=OFF \
   -DCMAKE_EXE_LINKER_FLAGS="-static" \
+  -DGRK_BUILD_CODEC=OFF \
   .
 RUN make -C build -j $(nproc)
 
