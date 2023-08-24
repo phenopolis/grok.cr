@@ -1,12 +1,13 @@
 FROM alpine:3.17
 
 RUN apk add \
-  build-base \
   cmake \
   crystal \
+  g++ \
   git \
   libjpeg-turbo-dev \
   libjpeg-turbo-static \
+  make \
   yasm
 
 RUN rm /usr/lib/libjpeg.so
