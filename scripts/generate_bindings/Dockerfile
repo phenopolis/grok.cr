@@ -10,7 +10,7 @@ RUN apk add \
   yaml-dev
 
 WORKDIR /libgen
-RUN git clone --branch master --depth 1 https://github.com/olbat/libgen .
+RUN git clone --branch v0.2.11 --depth 1 https://github.com/olbat/libgen .
 RUN make install -j $(nproc)
 
 WORKDIR /grok.cr
